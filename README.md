@@ -1,6 +1,3 @@
 # Flame-Sound-Fix
-Sourcemod Plugin:
-Fix the noise in background when a player is hurt by a rocket (Dodegeball Gamemode).
-
-How install it?
-Install it in addons/sourcemod/
+Don't use this fix, this isn't the best way and will cause problems one day.
+Use this one from a friend instead: https://gitlab.com/nanochip/fixfireloop.git
