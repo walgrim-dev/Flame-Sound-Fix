@@ -23,14 +23,8 @@ public void OnEntityCreated(int entity, const char[] classname)
 {
 	if ((StrEqual(classname, "tf_projectile_rocket") || StrEqual(classname, "tf_projectile_sentryrocket")))
 	{
-		SDKHook(entity, SDKHook_StartTouch, OnStartTouch);
+		SDKHook(entity, SDKHook_Touch, killRocketEntity);
 	}
-}
-
-public Action OnStartTouch(int entity, int other)
-{
-	SDKHook(entity, SDKHook_Touch, killRocketEntity);
-	return Plugin_Handled;
 }
 
 public Action killRocketEntity(int entity, int other)
@@ -46,10 +40,12 @@ public Action killRocketEntity(int entity, int other)
 		AcceptEntityInput(entity, "Kill");
 		// We create our explosion
 		CreateExplosion(vOrigin, vAngleRotation, ref, damage);
+		return Plugin_Handled;
 	}
+	return Plugin_Continue;
 }
 
-Action CreateExplosion(float vOrigin[3], float vAngleRotation[3], int ref, float damage)
+void CreateExplosion(float vOrigin[3], float vAngleRotation[3], int ref, float damage)
 {
 	char damageBuffer[16];
 	int owner = EntRefToEntIndex(ref);
@@ -62,6 +58,7 @@ Action CreateExplosion(float vOrigin[3], float vAngleRotation[3], int ref, float
 		SetEntProp(explosion, Prop_Data, "m_iTeamNum", GetClientTeam(owner));
 		DispatchKeyValue(explosion, "iMagnitude", damageBuffer);
 		DispatchKeyValue(explosion, "iRadiusOverride", "100");
+		DispatchKeyValue(explosion, "DamageForce", "5000");
 		DispatchSpawn(explosion);
 		TeleportEntity(explosion, vOrigin, vAngleRotation, NULL_VECTOR);
 		AcceptEntityInput(explosion, "Explode");
