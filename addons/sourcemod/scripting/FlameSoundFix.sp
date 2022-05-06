@@ -53,7 +53,7 @@ Action CreateExplosion(float vOrigin[3], float vAngleRotation[3], int ref)
 	int explosion = CreateEntityByName("env_explosion");
 	if (IsValidEntity(explosion) && explosion != -1)
 	{
-		SetEntityFlags(explosion, 911);
+		SetEntityFlags(explosion, 788);
 		SetEntPropEnt(explosion, Prop_Data, "m_hOwnerEntity", owner);
 		SetEntProp(explosion, Prop_Data, "m_iTeamNum", GetClientTeam(owner));
 		DispatchKeyValue(explosion, "iMagnitude", "250");
