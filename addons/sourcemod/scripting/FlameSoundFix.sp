@@ -43,10 +43,12 @@ public Action OnRocketSpawn(int entity)
 
 public void OnEntityDestroyed(int entity)
 {
-	if (FindEntityByClassname(entity, "tf_projectile_rocket") != -1)
+	char classname[32];
+	GetEntPropString(entity, Prop_Data, "m_iClassname", classname, sizeof(classname));
+	if (StrEqual(classname, "tf_projectile_rocket") || StrEqual(classname, "tf_projectile_sentryrocket"))
 	{
 		int m_hOriginal = GetEntPropEnt(entity, Prop_Send, "m_hOriginalLauncher");
 		int m_hLauncher = GetEntPropEnt(entity, Prop_Send, "m_hLauncher");
-		PrintToChatAll("Destruction: Original launcher = %i, actual launcher = %i", m_hOriginal, m_hLauncher);
+		PrintToChatAll("Original launcher = %i, actual launcher = %i", m_hOriginal, m_hLauncher);
 	}
 }
