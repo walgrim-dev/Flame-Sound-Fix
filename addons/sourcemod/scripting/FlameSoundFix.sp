@@ -29,11 +29,15 @@ public void OnEntityCreated(int entity, const char[] classname)
 
 public Action killRocketEntity(int entity, int other)
 {
+	if (other > MaxClients || other < 1)
+	{
+		return Plugin_Continue;
+	}
 	if (IsValidEntity(entity) && entity != -1)
 	{
 		float vOrigin[3];
 		float vAngleRotation[3];
-		float damage = GetEntDataFloat(entity,  FindSendPropInfo("CTFProjectile_Rocket", "m_iDeflected") + 4);
+		float damage = GetEntDataFloat(entity, FindSendPropInfo("CTFProjectile_Rocket", "m_iDeflected") + 4);
 		int ref = EntIndexToEntRef(GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity"));
 		GetEntPropVector(entity, Prop_Data, "m_vecOrigin", vOrigin);
 		GetEntPropVector(entity, Prop_Data, "m_angRotation", vAngleRotation);
@@ -56,12 +60,12 @@ void CreateExplosion(float vOrigin[3], float vAngleRotation[3], int ref, float d
 	if (IsValidEntity(explosion) && explosion != -1)
 	{
 		SetEntityFlags(explosion, 788);
-		SetEntPropEnt(explosion, Prop_Data, "m_hOwnerEntity", owner);
 		SetEntPropEnt(explosion, Prop_Data, "m_hInflictor", entity);
 		SetEntProp(explosion, Prop_Data, "m_iTeamNum", GetClientTeam(owner));
 		DispatchKeyValue(explosion, "iMagnitude", damageBuffer);
 		DispatchKeyValue(explosion, "iRadiusOverride", "100");
 		DispatchKeyValue(explosion, "DamageForce", damageForce);
+		SetEntPropEnt(explosion, Prop_Data, "m_hOwnerEntity", owner);
 		DispatchSpawn(explosion);
 		TeleportEntity(explosion, vOrigin, vAngleRotation, NULL_VECTOR);
 		AcceptEntityInput(explosion, "Explode");
