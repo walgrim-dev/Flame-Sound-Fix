@@ -35,6 +35,8 @@ public Action OnRocketSpawn(int entity)
 {
 	if (IsValidEntity(entity))
 	{
+		SetEntPropEnt(entity, Prop_Send, "m_hOriginalLauncher", entity);
+		SetEntPropEnt(entity, Prop_Send, "m_hLauncher", entity);
 		int m_hOriginal = GetEntPropEnt(entity, Prop_Send, "m_hOriginalLauncher");
 		int m_hLauncher = GetEntPropEnt(entity, Prop_Send, "m_hLauncher");
 		PrintToChatAll("Original launcher = %i, actual launcher = %i", m_hOriginal, m_hLauncher);
@@ -49,6 +51,6 @@ public void OnEntityDestroyed(int entity)
 	{
 		int m_hOriginal = GetEntPropEnt(entity, Prop_Send, "m_hOriginalLauncher");
 		int m_hLauncher = GetEntPropEnt(entity, Prop_Send, "m_hLauncher");
-		PrintToChatAll("Original launcher = %i, actual launcher = %i", m_hOriginal, m_hLauncher);
+		PrintToChatAll("Destruction: Original launcher = %i, actual launcher = %i", m_hOriginal, m_hLauncher);
 	}
 }
