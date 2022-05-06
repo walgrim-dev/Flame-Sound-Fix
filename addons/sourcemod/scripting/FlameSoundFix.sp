@@ -48,19 +48,25 @@ public Action killRocketEntity(int entity, int other)
 void CreateExplosion(float vOrigin[3], float vAngleRotation[3], int ref, float damage)
 {
 	char damageBuffer[16];
+	char damageForce[32];
 	int owner = EntRefToEntIndex(ref);
+	int weapon = GetEntPropEnt(owner, Prop_Send, "m_hWeapon");
+
 	FloatToString(damage, damageBuffer, sizeof(damageBuffer));
+	FloatToString(damage * 2.0, damageForce, sizeof(damageForce));
 	int explosion = CreateEntityByName("env_explosion");
 	if (IsValidEntity(explosion) && explosion != -1)
 	{
 		SetEntityFlags(explosion, 788);
 		SetEntPropEnt(explosion, Prop_Data, "m_hOwnerEntity", owner);
+		SetEntPropEnt(explosion, Prop_Data, "m_hInflictor", weapon);
 		SetEntProp(explosion, Prop_Data, "m_iTeamNum", GetClientTeam(owner));
 		DispatchKeyValue(explosion, "iMagnitude", damageBuffer);
 		DispatchKeyValue(explosion, "iRadiusOverride", "100");
-		DispatchKeyValue(explosion, "DamageForce", "5000");
+		DispatchKeyValue(explosion, "DamageForce", damageForce);
 		DispatchSpawn(explosion);
 		TeleportEntity(explosion, vOrigin, vAngleRotation, NULL_VECTOR);
 		AcceptEntityInput(explosion, "Explode");
+		AcceptEntityInput(explosion, "Kill");
 	}
 }
