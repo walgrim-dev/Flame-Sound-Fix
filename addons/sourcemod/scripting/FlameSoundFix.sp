@@ -24,6 +24,7 @@ public void OnEntityCreated(int entity, const char[] classname)
 		return;
 	}
 	SDKHook(entity, SDKHook_Spawn, OnRocketSpawn);
+	SDKHook(entity, SDKHook_EndTouchPost, OnRocketExplode);
 }
 
 /*
@@ -37,5 +38,15 @@ public Action OnRocketSpawn(int entity)
 		int m_hOriginal = GetEntPropEnt(entity, Prop_Send, "m_hOriginalLauncher");
 		int m_hLauncher = GetEntPropEnt(entity, Prop_Send, "m_hLauncher");
 		PrintToChatAll("Original launcher = %i, actual launcher = %i", m_hOriginal, m_hLauncher);
+	}
+}
+
+public void OnRocketExplode(int entity, int other)
+{
+	if (IsValidEntity(entity))
+	{
+		int m_hOriginal = GetEntPropEnt(entity, Prop_Send, "m_hOriginalLauncher");
+		int m_hLauncher = GetEntPropEnt(entity, Prop_Send, "m_hLauncher");
+		PrintToChatAll("Destruction: Original launcher = %i, actual launcher = %i", m_hOriginal, m_hLauncher);
 	}
 }
