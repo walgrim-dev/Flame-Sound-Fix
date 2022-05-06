@@ -20,23 +20,10 @@ public Plugin myinfo =
 *******************************************************************************/
 public void OnEntityCreated(int entity, const char[] classname)
 {
-	if (!(StrEqual(classname, "tf_projectile_rocket") || StrEqual(classname, "tf_projectile_sentryrocket")))
+	if ((StrEqual(classname, "tf_projectile_rocket") || StrEqual(classname, "tf_projectile_sentryrocket")))
 	{
-		return;
-	}
-	SDKHook(entity, SDKHook_Spawn, OnRocketSpawn);
-}
-
-/*
-** Verify if this one is valid, set it as a BaseProjectile (if I'm not wrong).
-** Just unhook it at the end to avoid bugs (or double Hook I guess).
-*******************************************************************************/
-public Action OnRocketSpawn(int entity)
-{
-	if (IsValidEntity(entity))
-	{
-		SetEntPropEnt(entity, Prop_Send, "m_hOriginalLauncher", entity);
-		SetEntPropEnt(entity, Prop_Send, "m_hLauncher", entity);
+		SetEntPropEnt(entity, Prop_Send, "m_hOriginalLauncher", -1);
+		SetEntPropEnt(entity, Prop_Send, "m_hLauncher", -1);
 		int m_hOriginal = GetEntPropEnt(entity, Prop_Send, "m_hOriginalLauncher");
 		int m_hLauncher = GetEntPropEnt(entity, Prop_Send, "m_hLauncher");
 		PrintToChatAll("Original launcher = %i, actual launcher = %i", m_hOriginal, m_hLauncher);
