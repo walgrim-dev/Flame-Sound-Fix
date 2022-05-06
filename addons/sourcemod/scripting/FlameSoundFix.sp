@@ -28,12 +28,8 @@ public void OnEntityCreated(int entity, const char[] classname)
 
 public Action OnStartTouch(int entity, int other)
 {
-	if (other > 0 && other <= MaxClients)
-	{
-		SDKHook(entity, SDKHook_Touch, killRocketEntity);
-		return Plugin_Handled;
-	}
-	return Plugin_Continue;
+	SDKHook(entity, SDKHook_Touch, killRocketEntity);
+	return Plugin_Handled;
 }
 
 public Action killRocketEntity(int entity, int other)
@@ -41,27 +37,29 @@ public Action killRocketEntity(int entity, int other)
 	if (IsValidEntity(entity) && entity != -1)
 	{
 		float vOrigin[3];
+		float vAngleRotation[3];
 		int ref = EntIndexToEntRef(GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity"));
 		GetEntPropVector(entity, Prop_Data, "m_vecOrigin", vOrigin);
+		GetEntPropVector(entity, Prop_Data, "m_angRotation", vAngleRotation);
 		AcceptEntityInput(entity, "Kill");
 		// We create our explosion
-		CreateExplosion(vOrigin, ref);
+		CreateExplosion(vOrigin, vAngleRotation, ref);
 	}
 }
 
-Action CreateExplosion(float vOrigin[3], int ref)
+Action CreateExplosion(float vOrigin[3], float vAngleRotation[3], int ref)
 {
 	int owner = EntRefToEntIndex(ref);
 	int explosion = CreateEntityByName("env_explosion");
 	if (IsValidEntity(explosion) && explosion != -1)
 	{
-		SetEntityFlags(explosion, 912);
+		SetEntityFlags(explosion, 911);
 		SetEntPropEnt(explosion, Prop_Data, "m_hOwnerEntity", owner);
 		SetEntProp(explosion, Prop_Data, "m_iTeamNum", GetClientTeam(owner));
-		SetEntPropVector(explosion, Prop_Data, "m_vecOrigin", vOrigin);
 		DispatchKeyValue(explosion, "iMagnitude", "250");
 		DispatchKeyValue(explosion, "iRadiusOverride", "100");
 		DispatchSpawn(explosion);
+		TeleportEntity(explosion, vOrigin, vAngleRotation, NULL_VECTOR);
 		AcceptEntityInput(explosion, "Explode");
 	}
 }
