@@ -18,7 +18,7 @@ public Plugin myinfo =
 ** If it's a tf_projectile_rocket or tf_projectile_sentryrocket.
 ** Hook when this projectile spawns.
 *******************************************************************************/
-
+/*
 public void OnEntityCreated(int entity, const char[] classname)
 {
 	if ((StrEqual(classname, "tf_projectile_rocket") || StrEqual(classname, "tf_projectile_sentryrocket")))
@@ -30,6 +30,7 @@ public void OnEntityCreated(int entity, const char[] classname)
 		PrintToChatAll("Original launcher = %i, actual launcher = %i", m_hOriginal, m_hLauncher);
 	}
 }
+*/
 
 public void OnEntityDestroyed(int entity)
 {
@@ -37,7 +38,7 @@ public void OnEntityDestroyed(int entity)
 	GetEntPropString(entity, Prop_Data, "m_iClassname", classname, sizeof(classname));
 	if (StrEqual(classname, "tf_projectile_rocket") || StrEqual(classname, "tf_projectile_sentryrocket"))
 	{
-		//SetEntPropEnt(entity, Prop_Send, "m_hOriginalLauncher", -1);
+		SetEntPropEnt(entity, Prop_Send, "m_hOriginalLauncher", entity);
 		//SetEntPropEnt(entity, Prop_Send, "m_hLauncher", -1);
 		int m_hOriginal = GetEntPropEnt(entity, Prop_Send, "m_hOriginalLauncher");
 		int m_hLauncher = GetEntPropEnt(entity, Prop_Send, "m_hLauncher");
