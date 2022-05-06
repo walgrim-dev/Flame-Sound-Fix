@@ -3,6 +3,7 @@
 #include <sdkhooks>
 #include <sdktools>
 #include <sourcemod>
+#include <tfdb>
 #pragma newdecls required
 
 public Plugin myinfo =
@@ -38,25 +39,28 @@ public Action killRocketEntity(int entity, int other)
 	{
 		float vOrigin[3];
 		float vAngleRotation[3];
+		float damage = GetEntDataFloat(entity,  FindSendPropInfo("CTFProjectile_Rocket", "m_iDeflected") + 4);
 		int ref = EntIndexToEntRef(GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity"));
 		GetEntPropVector(entity, Prop_Data, "m_vecOrigin", vOrigin);
 		GetEntPropVector(entity, Prop_Data, "m_angRotation", vAngleRotation);
 		AcceptEntityInput(entity, "Kill");
 		// We create our explosion
-		CreateExplosion(vOrigin, vAngleRotation, ref);
+		CreateExplosion(vOrigin, vAngleRotation, ref, damage);
 	}
 }
 
-Action CreateExplosion(float vOrigin[3], float vAngleRotation[3], int ref)
+Action CreateExplosion(float vOrigin[3], float vAngleRotation[3], int ref, float damage)
 {
+	char damageBuffer[16];
 	int owner = EntRefToEntIndex(ref);
+	FloatToString(damage, damageBuffer, sizeof(damageBuffer));
 	int explosion = CreateEntityByName("env_explosion");
 	if (IsValidEntity(explosion) && explosion != -1)
 	{
 		SetEntityFlags(explosion, 788);
 		SetEntPropEnt(explosion, Prop_Data, "m_hOwnerEntity", owner);
 		SetEntProp(explosion, Prop_Data, "m_iTeamNum", GetClientTeam(owner));
-		DispatchKeyValue(explosion, "iMagnitude", "250");
+		DispatchKeyValue(explosion, "iMagnitude", damageBuffer);
 		DispatchKeyValue(explosion, "iRadiusOverride", "100");
 		DispatchSpawn(explosion);
 		TeleportEntity(explosion, vOrigin, vAngleRotation, NULL_VECTOR);
