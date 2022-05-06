@@ -57,7 +57,7 @@ Action CreateExplosion(float vOrigin[3], int ref)
 	{
 		SetEntityFlags(explosion, 912);
 		SetEntPropEnt(explosion, Prop_Data, "m_hOwnerEntity", owner);
-		SetEntPropEnt(explosion, Prop_Data, "m_iTeamNum", GetClientTeam(owner));
+		SetEntProp(explosion, Prop_Data, "m_iTeamNum", GetClientTeam(owner));
 		SetEntPropVector(explosion, Prop_Data, "m_vecOrigin", vOrigin);
 		DispatchKeyValue(explosion, "iMagnitude", "250");
 		DispatchKeyValue(explosion, "iRadiusOverride", "100");
