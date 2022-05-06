@@ -24,7 +24,7 @@ public void OnEntityCreated(int entity, const char[] classname)
 		return;
 	}
 	SDKHook(entity, SDKHook_Spawn, OnRocketSpawn);
-	SDKHook(entity, SDKHook_EndTouchPost, OnRocketExplode);
+	SDKHook(entity, SDKHook_TouchPost, OnRocketExplode);
 }
 
 /*
