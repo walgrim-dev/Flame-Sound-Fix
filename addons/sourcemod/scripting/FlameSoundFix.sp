@@ -1,6 +1,7 @@
 #pragma semicolon 1
 
 #include <sdkhooks>
+#include <sdktools_functions>
 #include <sourcemod>
 #pragma newdecls required
 
@@ -24,7 +25,6 @@ public void OnEntityCreated(int entity, const char[] classname)
 		return;
 	}
 	SDKHook(entity, SDKHook_Spawn, OnRocketSpawn);
-	SDKHook(entity, SDKHook_TouchPost, OnRocketExplode);
 }
 
 /*
@@ -41,9 +41,9 @@ public Action OnRocketSpawn(int entity)
 	}
 }
 
-public void OnRocketExplode(int entity, int other)
+public void OnEntityDestroyed(int entity)
 {
-	if (IsValidEntity(entity))
+	if (FindEntityByClassname(entity, "tf_projectile_rocket") != -1)
 	{
 		int m_hOriginal = GetEntPropEnt(entity, Prop_Send, "m_hOriginalLauncher");
 		int m_hLauncher = GetEntPropEnt(entity, Prop_Send, "m_hLauncher");
