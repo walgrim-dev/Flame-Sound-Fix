@@ -1,3 +1,7 @@
 # Flame-Sound-Fix
-Don't use this fix, this isn't the best way and will cause problems one day.
-Use this one from a friend instead: https://gitlab.com/nanochip/fixfireloop.git
+This is a fix for the dodgeball gamemode on tf2.
+Valve introduced a new bug where the sound is looping after a hit.
+With this fix, the sound is gone and killstreak, strange weapons etc.. works fine.
+
+Install in addons/sourcemod/plugins/
+
