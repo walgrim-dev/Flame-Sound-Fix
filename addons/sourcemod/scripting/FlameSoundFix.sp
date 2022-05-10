@@ -3,7 +3,6 @@
 #include <sdkhooks>
 #include <sdktools>
 #include <sourcemod>
-#include <tfdb>
 #pragma newdecls required
 
 public Plugin myinfo =
@@ -37,35 +36,38 @@ public Action killRocketEntity(int entity, int other)
 	{
 		float vOrigin[3];
 		float vAngleRotation[3];
-		float damage = GetEntDataFloat(entity, FindSendPropInfo("CTFProjectile_Rocket", "m_iDeflected") + 4);
-		int ref = EntIndexToEntRef(GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity"));
+		float damage      = GetEntDataFloat(entity, FindSendPropInfo("CTFProjectile_Rocket", "m_iDeflected") + 4);
+		int   ref         = EntIndexToEntRef(GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity"));
+		int   deflections = GetEntProp(entity, Prop_Send, "m_iDeflected");
 		GetEntPropVector(entity, Prop_Data, "m_vecOrigin", vOrigin);
 		GetEntPropVector(entity, Prop_Data, "m_angRotation", vAngleRotation);
 		// We create our explosion
-		CreateExplosion(vOrigin, vAngleRotation, ref, damage, entity);
+		CreateExplosion(vOrigin, vAngleRotation, ref, damage, deflections, entity);
 		return Plugin_Handled;
 	}
 	return Plugin_Continue;
 }
 
-void CreateExplosion(float vOrigin[3], float vAngleRotation[3], int ref, float damage, int entity)
+void CreateExplosion(float vOrigin[3], float vAngleRotation[3], int ref, float damage, int deflections, int entity)
 {
 	char damageBuffer[16];
 	char damageForce[32];
-	int owner = EntRefToEntIndex(ref);
+	int  owner = EntRefToEntIndex(ref);
 
 	FloatToString(damage, damageBuffer, sizeof(damageBuffer));
 	FloatToString(damage * 2.0, damageForce, sizeof(damageForce));
+
 	int explosion = CreateEntityByName("env_explosion");
 	if (IsValidEntity(explosion) && explosion != -1)
 	{
-		SetEntityFlags(explosion, 788);
+		SetEntityFlags(explosion, 17172);
+		SetEntPropEnt(explosion, Prop_Data, "m_hEffectEntity", GetEntPropEnt(entity, Prop_Data, "m_hEffectEntity"));
+		SetEntPropEnt(explosion, Prop_Data, "m_hOwnerEntity", (deflections > 0) ? owner : -1);
 		SetEntPropEnt(explosion, Prop_Data, "m_hInflictor", entity);
 		SetEntProp(explosion, Prop_Data, "m_iTeamNum", GetClientTeam(owner));
 		DispatchKeyValue(explosion, "iMagnitude", damageBuffer);
 		DispatchKeyValue(explosion, "iRadiusOverride", "100");
 		DispatchKeyValue(explosion, "DamageForce", damageForce);
-		SetEntPropEnt(explosion, Prop_Data, "m_hOwnerEntity", owner);
 		DispatchSpawn(explosion);
 		TeleportEntity(explosion, vOrigin, vAngleRotation, NULL_VECTOR);
 		AcceptEntityInput(explosion, "Explode");
