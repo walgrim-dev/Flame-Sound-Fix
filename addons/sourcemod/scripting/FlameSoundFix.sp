@@ -5,73 +5,65 @@
 #include <sourcemod>
 #pragma newdecls required
 
+int originalWepIndex = -1;
+int oldDeflects      = 0;
+
 public Plugin myinfo =
 {
 	name        = "[TF2] FlameSoundFix",
 	author      = "Walgrim",
 	description = "Fix the annoying flame sound on player hurt",
-	version     = "1.1",
+	version     = "1.2",
 	url         = "http://steamcommunity.com/id/walgrim/"
 };
 
-/*
-** If it's a tf_projectile_rocket or tf_projectile_sentryrocket.
-** Hook when this projectile spawns.
-*******************************************************************************/
+public void OnClientPutInServer(int client)
+{
+	SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
+}
+
+public Action OnTakeDamage(int client, int& attacker, int& inflictor, float& damage, int& damagetype, int& weapon, float damageForce[3], float damagePosition[3])
+{
+	if (originalWepIndex != -1)
+	{
+		weapon = originalWepIndex;
+	}
+	return Plugin_Changed;
+}
+
 public void OnEntityCreated(int entity, const char[] classname)
 {
 	if ((StrEqual(classname, "tf_projectile_rocket") || StrEqual(classname, "tf_projectile_sentryrocket")))
 	{
-		SDKHook(entity, SDKHook_Touch, killRocketEntity);
+		originalWepIndex = -1;
+		SetEntPropEnt(entity, Prop_Send, "m_hOriginalLauncher", entity);
+		RequestFrame(OnNextFrame, EntIndexToEntRef(entity));
 	}
 }
 
-public Action killRocketEntity(int entity, int other)
+public void OnNextFrame(any entityRef)
 {
-	if (other > MaxClients || other < 1)
+	int entity = EntRefToEntIndex(entityRef);
+	if (!IsValidEntity(entity) || entity == -1)
 	{
-		return Plugin_Continue;
+		oldDeflects = 0;
+		return;
 	}
-	if (IsValidEntity(entity) && entity != -1)
+	int deflects = GetEntProp(entity, Prop_Send, "m_iDeflected");
+	if (deflects > oldDeflects)
 	{
-		float vOrigin[3];
-		float vAngleRotation[3];
-		float damage      = GetEntDataFloat(entity, FindSendPropInfo("CTFProjectile_Rocket", "m_iDeflected") + 4);
-		int   ref         = EntIndexToEntRef(GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity"));
-		int   deflections = GetEntProp(entity, Prop_Send, "m_iDeflected");
-		GetEntPropVector(entity, Prop_Data, "m_vecOrigin", vOrigin);
-		GetEntPropVector(entity, Prop_Data, "m_angRotation", vAngleRotation);
-		// We create our explosion
-		CreateExplosion(vOrigin, vAngleRotation, ref, damage, deflections, entity);
-		return Plugin_Handled;
+		/*
+		    So what is happening here ?
+		    We know that this sound is produced by the attacker's weapon
+		    When there's a deflect, m_hLauncher takes the weapon index of the attacker
+		    And on impact that causes this sound (why idk but it's linked somehow)
+		    What we are doing here is taking the weapon index on deflect and store it into our variable
+		    Just after we change m_hLauncher to an another entity index so it's no more linked to our weapon
+		    So now we just have to replace the wrong weapon index (our false m_hLauncher) to the correct one on player hit
+		 */
+		originalWepIndex = GetEntPropEnt(entity, Prop_Send, "m_hLauncher");
+		SetEntPropEnt(entity, Prop_Send, "m_hLauncher", GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity"));
+		oldDeflects = deflects;
 	}
-	return Plugin_Continue;
-}
-
-void CreateExplosion(float vOrigin[3], float vAngleRotation[3], int ref, float damage, int deflections, int entity)
-{
-	char damageBuffer[16];
-	char damageForce[32];
-	int  owner = EntRefToEntIndex(ref);
-
-	FloatToString(damage, damageBuffer, sizeof(damageBuffer));
-	FloatToString(damage * 2.0, damageForce, sizeof(damageForce));
-
-	int explosion = CreateEntityByName("env_explosion");
-	if (IsValidEntity(explosion) && explosion != -1)
-	{
-		SetEntityFlags(explosion, 17172);
-		SetEntPropEnt(explosion, Prop_Data, "m_hEffectEntity", GetEntPropEnt(entity, Prop_Data, "m_hEffectEntity"));
-		SetEntPropEnt(explosion, Prop_Data, "m_hOwnerEntity", (deflections > 0) ? owner : -1);
-		SetEntPropEnt(explosion, Prop_Data, "m_hInflictor", entity);
-		SetEntProp(explosion, Prop_Data, "m_iTeamNum", GetClientTeam(owner));
-		DispatchKeyValue(explosion, "iMagnitude", damageBuffer);
-		DispatchKeyValue(explosion, "iRadiusOverride", "100");
-		DispatchKeyValue(explosion, "DamageForce", damageForce);
-		DispatchSpawn(explosion);
-		TeleportEntity(explosion, vOrigin, vAngleRotation, NULL_VECTOR);
-		AcceptEntityInput(explosion, "Explode");
-		AcceptEntityInput(entity, "Kill");
-		AcceptEntityInput(explosion, "Kill");
-	}
+	RequestFrame(OnNextFrame, EntIndexToEntRef(entity));
 }
